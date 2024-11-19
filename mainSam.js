@@ -21,34 +21,131 @@ const sankey = d3Sankey.sankey()
   .nodePadding(10)
   .extent([[1, 5], [width - 1, height - 5]]);
 
-// Diagram 4 Node code
-function getNode4(data) {
-  const nodes = [];
-  return nodes;
+  function jmuStudent() {
+    return [{name: "JMU Student", title: "JMU Student" }];
+  }
+  
+  function jmuSemester() {
+    return [
+      {name: "Fall", title: "Fall" },
+      {name: "Spring", title: "Spring" },
+    ];
+  }
+  
+  function studentCosts(data) {
+    const validData = data.filter(item => item.semester);
+    const uniqueCosts = Array.from(
+        new Set(validData.map(item => item.name))).map(name => ({ name, title: name })); 
+
+    return uniqueCosts;
+}
+function jmuStudentCostsLinks(data) {
+  const links = [];
+
+  const validData = data.filter(item => item.semester);
+
+  links.push({ source: "JMU Student", target: "Fall", value: 1 });
+  links.push({ source: "JMU Student", target: "Spring", value: 1 });
+
+  //links from Fall/Spring to itemized costs
+  validData.forEach(item => {
+      links.push({
+          source: item.semester, 
+          target: item.name,    
+          value: item["in-state"]
+      });
+  });
+
+  return links;
+}
+function jmuStudentCostNodes(data){
+  return [
+    // 1. leftmost node: JMU Student
+    ...jmuStudent(),
+    // 2. second-to-leftmost nodes: Fall, Spring
+    ...jmuSemester(),
+    // 3. rightmost nodes: the `student itemized` costs from the `student-costs`
+    ...studentCosts(data)
+  ];
 }
 
- 
-// Diagram 4 code 
-function forDiagram4(jmuData) {
-  const relevantData = jmuData["jmu-athletics"];
-  const nodes = getNode4(relevantData);
-  const links = getLinks4(relevantData);
-  return {'nodes': nodes , 'links': links}
+function jmuNodesLinks(jmuData){
+  const data = jmuData["student-costs"];
+  const result = {
+    nodes: jmuStudentCostNodes(data),
+    links: jmuStudentCostsLinks(data)
+  }
+  console.log("hello ", result);
+  return result;
 }
 
+
+function auxiliaryComprehensiveFee() {
+  return [{ name: "Auxiliary Comprehensive Fee", title: "Auxiliary Comprehensive Fee" }];
+}
+
+function auxiliaryComponents(data) {
+
+  const components = data.filter(item => item.type === "Auxiliary Comprehensive Fee Component");
+
+  //create unique cost nodes based on the `name` field
+  const uniqueComponents = Array.from(
+    new Set(components.map(item => item.name))
+  ).map(name => ({ name, title: name }));
+
+  return uniqueComponents;
+}
+
+function auxiliaryCostsLinks(data) {
+  const links = [];
+  const validData = data.filter(item => item.type === "Auxiliary Comprehensive Fee Component");
+
+  validData.forEach(item => {
+      links.push({
+          source: "Auxiliary Comprehensive Fee",
+          target: item.name, 
+          value: item.amount
+      });
+  });
+
+  return links;
+}
+
+function auxiliaryNodes(data) {
+  return [
+    // 1. leftmost node: Auxiliary Comprehensive Fee
+    ...auxiliaryComprehensiveFee(),
+    // 2. rightmost nodes: the `Auxiliary Comprehensive Fee Component` costs
+    ...auxiliaryComponents(data)
+  ];
+}
+
+function auxiliaryNodesLinks(auxiliaryData) {
+  const data = auxiliaryData["student-costs"];
+  const result = {
+    nodes: auxiliaryNodes(data),
+    links: auxiliaryCostsLinks(data)
+  };
+  return result;
+}
 
 async function init() {
-  const data = await d3.json("data/data_sankey.json");
-  // const jmuData = await d3.json("data/jmu.json");
-  // const data = forDiagram4(jmuData);
-  console.log('data' , data);
+  const jmuData = await d3.json("data/jmu.json");
+  const data = jmuNodesLinks(jmuData);
+  //for second graph
+  //const data jmuNodesLinks(jmuData);
+  
   // Applies it to the data. We make a copy of the nodes and links objects
   // so as to avoid mutating the original.
+//TODO convert stuff format into sankey format and asign it the value data
   const { nodes, links } = sankey({
-    // const tmp = sankey({
+  // const tmp = sankey({
     nodes: data.nodes.map(d => Object.assign({}, d)),
     links: data.links.map(d => Object.assign({}, d))
+    
   });
+
+
 
   // console.log('tmp', tmp);
   console.log('nodes', nodes);
@@ -73,8 +170,7 @@ async function init() {
   rect.append("title")
     .text(d => {
       console.log('d', d);
-      return `${d.name}\n${format(d.value)}`
-    });
+      return `${d.name}\n${format(d.value)}`});
 
   // Creates the paths that represent the links.
   const link = svg.append("g")
@@ -122,7 +218,7 @@ async function init() {
     .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
     .text(d => d.title);
 
-  // Adds labels on the links.
+    // Adds labels on the links.
   svg.append("g")
     .selectAll()
     .data(links)
@@ -141,7 +237,7 @@ async function init() {
     });
 
   const svgNode = svg.node();
-  document.body.appendChild(svgNode);
+    document.body.appendChild(svgNode);
   return svgNode;
 }
 
