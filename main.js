@@ -21,9 +21,27 @@ const sankey = d3Sankey.sankey()
   .nodePadding(10)
   .extent([[1, 5], [width - 1, height - 5]]);
 
+// leftmost nodes: football, men's basketball, women's basketball, other sports, non-program specific
+function getNodes4Col1() {
+  return [
+    {name: "football" , title: "football"},
+    {name: "men's basketball", title: "men's basketball"},
+    {name: "women's basketball", title: "women's basketball"},
+    {name: "other sports", title: "other sports"},
+    {name: "non-program specific", title: "non-program specific"}
+  ];
+}
+
+// second-to-leftmost nodes: JMU Athletics (positive) Revenue items (e.g. Ticket sales, etc.)
+function getNodes4Col2(data) {
+  let nodes = [];
+  return nodes;
+}
+
 // Diagram 4 Node code
 function getNode4(data) {
   const nodes = [];
+  nodes.concat(getNodes4Col1());
   return nodes;
 }
 
