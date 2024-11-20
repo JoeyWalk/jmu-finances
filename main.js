@@ -38,6 +38,28 @@ function getNodes4Col2(data) {
   return nodes;
 }
 
+// center node: JMU Athletics
+function getNodes4Col3(data) {
+  return [{name: "JMU Athletics" , title: "JMU Athletics"}];
+}
+
+// second-to-rightmost nodes: JMU Athletics Expense categories (negative revenue) (e.g. Athletic student aid, etc.)
+function getNodes4Col4(data) {
+  let nodes = [];
+  return nodes;
+}
+
+// rightmost nodes: football, men's basketball, women's basketball, other sports, non-program specific
+function getNodes4Col5() {
+  return [
+    {name: "footballEnd" , title: "football"},
+    {name: "men's basketballEnd", title: "men's basketball"},
+    {name: "women's basketballEnd", title: "women's basketball"},
+    {name: "other sportsEnd", title: "other sports"},
+    {name: "non-program specificEnd", title: "non-program specific"}
+  ];
+}
+
 // Diagram 4 Node code
 function getNode4(data) {
   const nodes = [];
