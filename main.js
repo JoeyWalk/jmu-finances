@@ -35,6 +35,12 @@ function getNodes4Col1() {
 // second-to-leftmost nodes: JMU Athletics (positive) Revenue items (e.g. Ticket sales, etc.)
 function getNodes4Col2(data) {
   let nodes = [];
+  for ( let i = 0; i < data.length; i++ ) {
+    if (data[i].type === "Operating Revenues") {
+      let dataName = data[i].name;
+      nodes.push({name: dataName, title: dataName});
+    }
+  }
   return nodes;
 }
 
@@ -46,6 +52,12 @@ function getNodes4Col3(data) {
 // second-to-rightmost nodes: JMU Athletics Expense categories (negative revenue) (e.g. Athletic student aid, etc.)
 function getNodes4Col4(data) {
   let nodes = [];
+  for ( let i = 0; i < data.length; i++ ) {
+    if (data[i].type === "Operating Expenses") {
+      let dataName = data[i].name;
+      nodes.push({name: dataName, title: dataName});
+    }
+  }
   return nodes;
 }
 
@@ -64,7 +76,17 @@ function getNodes4Col5() {
 function getNode4(data) {
   const nodes = [];
   nodes.concat(getNodes4Col1());
+  nodes.concat(getNodes4Col2(data));
+  nodes.concat(getNodes4Col3());
+  nodes.concat(getNodes4Col4(data));
+  nodes.concat(getNodes4Col5());
   return nodes;
+}
+
+// Diagram 4 link code 
+function getLink4(data) {
+  const links = [];
+
 }
 
  
@@ -79,8 +101,8 @@ function forDiagram4(jmuData) {
 
 async function init() {
   const data = await d3.json("data/data_sankey.json");
-  // const jmuData = await d3.json("data/jmu.json");
-  // const data = forDiagram4(jmuData);
+  const jmuData = await d3.json("data/jmu.json");
+  const data1 = forDiagram4(jmuData);
   console.log('data' , data);
   // Applies it to the data. We make a copy of the nodes and links objects
   // so as to avoid mutating the original.
