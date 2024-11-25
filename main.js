@@ -38,7 +38,7 @@ function getNodes4Col2(data) {
   for ( let i = 0; i < data.length; i++ ) {
     if (data[i].type === "Operating Revenues") {
       let dataName = data[i].name;
-      nodes.push({name: dataName, title: dataName});
+      nodes.push({name: dataName, title: dataName, location: i});
     }
   }
   return nodes;
@@ -55,7 +55,11 @@ function getNodes4Col4(data) {
   for ( let i = 0; i < data.length; i++ ) {
     if (data[i].type === "Operating Expenses") {
       let dataName = data[i].name;
-      nodes.push({name: dataName, title: dataName});
+      if (dataName === "Guarantees") {
+        nodes.push({name: dataName + " Expenses", title: dataName, location: i});
+      } else {
+        nodes.push({name: dataName, title: dataName, location: i});
+      }
     }
   }
   return nodes;
@@ -75,34 +79,104 @@ function getNodes4Col5() {
 // Diagram 4 Node code
 function getNode4(data) {
   const nodes = [];
-  nodes.concat(getNodes4Col1());
-  nodes.concat(getNodes4Col2(data));
-  nodes.concat(getNodes4Col3());
-  nodes.concat(getNodes4Col4(data));
-  nodes.concat(getNodes4Col5());
+  nodes.push(...getNodes4Col1());
+  nodes.push(...getNodes4Col2(data));
+  nodes.push(...getNodes4Col3());
+  nodes.push(...getNodes4Col4(data));
+  nodes.push(...getNodes4Col5());
+  console.log("nodes in getNode4: " , nodes);
   return nodes;
 }
 
-// Diagram 4 link code 
-function getLink4(data) {
+function getLinks1and2(data) {
   const links = [];
+  const col2 = getNodes4Col2(data);
+  for (let i = 0; i < col2.length; i++) {
+    let footballLink = {source: "football", value: data[col2[i].location].Football, target: col2[i]["name"]};
+    let menBasketballLink = {source: "men's basketball", value: data[col2[i].location]["Men's Basketball"], target: col2[i]["name"]};
+    let womenBasktballLink = {source: "women's basketball", value: data[col2[i].location]["Women's Basketball"], target: col2[i]["name"]};
+    let otherLink = {source: "other sports", value: data[col2[i].location]["Other sports"], target: col2[i]["name"]};
+    let nonSpecific = {source: "non-program specific", value: data[col2[i].location]["Non-Program Specific"], target: col2[i]["name"]};
+    links.push(footballLink);
+    links.push(menBasketballLink);
+    links.push(womenBasktballLink);
+    links.push(otherLink);
+    links.push(nonSpecific);
+  }
+  console.log("col 1 to 2 links: " , links)
+  return links;
+}
 
+// The links connecting columns 2 and 3
+function getLinks2and3(data) {
+  const links = [];
+  const col2 = getNodes4Col2(data);
+  for (let i = 0; i < col2.length; i++) {
+    let newLink = {source: col2[i]["name"], value: data[col2[i].location]["Total"], target: "JMU Athletics"};
+    links.push(newLink);
+  }
+  console.log("col 2 to 3 links: " , links)
+  return links;
+}
+
+// The links connecting columns 3 and 4
+function getLinks3and4(data) {
+  const links = [];
+  const col4 = getNodes4Col4(data);
+  for (let i = 0; i < col4.length; i++) {
+    let newLink = {source: "JMU Athletics", value: data[col4[i].location]["Total"], target: col4[i]["name"]};
+    links.push(newLink);
+  }
+  console.log("col 3 to 4 links: " , links)
+  return links;
+}
+
+// The links connecting columns 4 and 5
+function getLinks4and5(data) {
+  const links = [];
+  const col4 = getNodes4Col4(data);
+  for (let i = 0; i < col4.length; i++) {
+    let footballLink = {source: col4[i]["name"], value: data[col4[i].location].Football, target: "footballEnd"};
+    let menBasketballLink = {source: col4[i]["name"], value: data[col4[i].location]["Men's Basketball"], target: "men's basketballEnd"};
+    let womenBasktballLink = {source: col4[i]["name"], value: data[col4[i].location]["Women's Basketball"], target: "women's basketballEnd"};
+    let otherLink = {source: col4[i]["name"], value: data[col4[i].location]["Other sports"], target: "other sportsEnd"};
+    let nonSpecific = {source: col4[i]["name"], value: data[col4[i].location]["Non-Program Specific"], target: "non-program specificEnd"};
+    links.push(footballLink);
+    links.push(menBasketballLink);
+    links.push(womenBasktballLink);
+    links.push(otherLink);
+    links.push(nonSpecific);
+  }
+  return links;
+}
+
+// Diagram 4 link code 
+function getLinks4(data) {
+  const links = [];
+  links.push(...getLinks1and2(data));
+  links.push(...getLinks2and3(data));
+  links.push(...getLinks3and4(data));
+  links.push(...getLinks4and5(data));
+  console.log("links in getLinks4: " , links);
+  return links;
 }
 
  
 // Diagram 4 code 
 function forDiagram4(jmuData) {
   const relevantData = jmuData["jmu-athletics"];
-  const nodes = getNode4(relevantData);
-  const links = getLinks4(relevantData);
+  let nodes = getNode4(relevantData);
+  let links = getLinks4(relevantData);
+  console.log("Nodes in forDiagram4: " , nodes) ;
+  console.log("Links in forDiagram4: " , links) ;
   return {'nodes': nodes , 'links': links}
 }
 
 
 async function init() {
-  const data = await d3.json("data/data_sankey.json");
+  //const data = await d3.json("data/data_sankey.json");
   const jmuData = await d3.json("data/jmu.json");
-  const data1 = forDiagram4(jmuData);
+  const data = forDiagram4(jmuData);
   console.log('data' , data);
   // Applies it to the data. We make a copy of the nodes and links objects
   // so as to avoid mutating the original.
