@@ -172,7 +172,9 @@ function forDiagram4(jmuData) {
   return {'nodes': nodes , 'links': links}
 }
 
-
+// NOTES TO GRADER
+// My teammates Sam Smithdeal and Jack McCormack made the graphs 
+// for 1 through 3 and submitted them seprately 
 async function init() {
   //const data = await d3.json("data/data_sankey.json");
   const jmuData = await d3.json("data/jmu.json");
